@@ -19,10 +19,9 @@ app.get('/', (req, res) => {
 });
 
 app.post('/api/users', (req, res) => {
-  const user = {
-    // id: 3, 
+  const user = { 
     username: req.body.username,
-    id: Math.floor(Math.random() * 100000), 
+    id: new Date().getTime(), 
   };
 
   db[user.id] = user;
@@ -34,11 +33,12 @@ app.get('/api/users', (req, res) => {
 });
 
 app.post('/api/users/:id/exercises', (req, res) => {
-  const { id, description, duration, date } = req.body;
+  const { description, duration, date } = req.body;
+  const { id } = req.params;
   const logItem = { 
     description, 
     duration, 
-    date: date || new Date().toUTCString(), 
+    date: new Date(date).getTime() || new Date().getTime(), // TODO: fix it, save in UTC number
   };
 
   if (!db[id]) {
@@ -56,8 +56,7 @@ app.post('/api/users/:id/exercises', (req, res) => {
 });
 
 app.get('/api/users/:id/logs', (req, res) => {
-  console.log(req.body);
-  const { id } = req.body;
+  const { id } = req.params;
   const user = db[id];
 
   if (!user) {
@@ -74,6 +73,9 @@ app.get('/api/users/:id/logs', (req, res) => {
     })
     .end();
 });
+
+// TODO: add from, to and limit parameters to a /api/users/:_id/logs request to retrieve part of the log of any user. 
+// from and to are dates in yyyy-mm-dd format. limit is an integer of how many logs to send back.
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port);
