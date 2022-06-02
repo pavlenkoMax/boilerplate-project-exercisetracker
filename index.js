@@ -115,11 +115,20 @@ app.get('/api/users/:id/logs/:from?/:to?/:limit?', async (req, res, next) => {
   const { id, from, to, limit } = req.params;
 
   try {
+    const user = await SQL3.get(
+      `
+      SELECT
+        *
+      FROM 
+        Users
+      WHERE
+        Users.id = ?
+      `, id
+    );
+
     const logs = await SQL3.all(
       `
       SELECT 
-        Users.id AS 'id',
-        Users.username AS 'username',
         Exercises.date AS 'date',
         Exercises.duration AS 'duration',
         Exercises.description AS 'description'
@@ -132,8 +141,12 @@ app.get('/api/users/:id/logs/:from?/:to?/:limit?', async (req, res, next) => {
         ${limit ? 'LIMIT ?' : ''} 
       `, id, from, to, limit
     );
-  
-    res.json(logs).end();
+
+    res.json({
+      ...user,
+      count: logs.length,
+      logs,
+    }).end();
   } catch (err) {
     next(err)
   }
