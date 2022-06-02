@@ -5,6 +5,7 @@ const path = require('path');
 const sqlite3 = require('sqlite3');
 const logger = require('morgan');
 const cors = require('cors');
+const { nextTick } = require('process');
 require('dotenv').config();
 
 const app = express();
@@ -50,11 +51,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '/views/index.html'));
 });
 
-app.post('/api/users', async (req, res) => {
+app.post('/api/users', async (req, res, next) => {
   const { username } = req.body;
 
   try {
-    await SQL3.run(
+    const result = await SQL3.run(
       `
       INSERT INTO
         Users
@@ -64,14 +65,14 @@ app.post('/api/users', async (req, res) => {
       `,
       username
     );
-  } catch(err) {
-    res.sendStatus(503).end();
+  } catch (err) {
+    next(err);
   }
 
-  res.end('Ok'); // TODO: return created item
+  res.end('Ok');
 });
 
-app.get('/api/users', async (req, res) => {
+app.get('/api/users', async (req, res, next) => {
   try {
     const users = await SQL3.all(
       `
@@ -83,12 +84,12 @@ app.get('/api/users', async (req, res) => {
     );
   
     res.json(users).end();
-  } catch {
-    res.sendStatus(404).end();
+  } catch (err) {
+    next(err)
   };
 });
 
-app.post('/api/users/:id/exercises', async (req, res) => {
+app.post('/api/users/:id/exercises', async (req, res, next) => {
   const { description, duration, date } = req.body;
   const { id } = req.params;
 ;
@@ -104,16 +105,15 @@ app.post('/api/users/:id/exercises', async (req, res) => {
       id, description, duration, date,
     );
   } catch(err) {
-    console.log(err);
-    res.sendStatus(503).end();
+    next(err)
   }
 
   res.end('Ok');
 });
 
-app.get('/api/users/:id/logs', async (req, res) => {
-  const { id } = req.params;
-  
+app.get('/api/users/:id/logs/:from?/:to?/:limit?', async (req, res, next) => {
+  const { id, from, to, limit } = req.params;
+
   try {
     const logs = await SQL3.all(
       `
@@ -128,18 +128,16 @@ app.get('/api/users/:id/logs', async (req, res) => {
         JOIN Users ON (Exercises.userId = Users.id)
       WHERE
         Users.id = ?
-      `, id
+        ${(from && to) ? 'and Exercises.date BETWEEN ? and ?' : ''}
+        ${limit ? 'LIMIT ?' : ''} 
+      `, id, from, to, limit
     );
   
     res.json(logs).end();
   } catch (err) {
-    console.log(err);
-    res.sendStatus(503).end();
+    next(err)
   }
 });
-
-// TODO: add from, to and limit parameters to a /api/users/:_id/logs request to retrieve part of the log of any user. 
-// from and to are dates in yyyy-mm-dd format. limit is an integer of how many logs to send back.
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port);
