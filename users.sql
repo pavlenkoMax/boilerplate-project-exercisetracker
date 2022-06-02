@@ -1,0 +1,16 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS Users (
+	id INTEGER PRIMARY KEY ASC,
+	username VARCHAR(40) UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS Exercises (
+	id INTEGER PRIMARY KEY ASC,
+	userId INTEGER,
+	description TINYTEXT,
+	duration INTEGER,
+	date DATE,
+
+	FOREIGN KEY (userId) REFERENCES Users(id)
+);
