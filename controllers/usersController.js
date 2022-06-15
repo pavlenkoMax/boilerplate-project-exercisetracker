@@ -46,7 +46,7 @@ const user_exercise_create = async (req, res) => {
 
 const user_exercises_list = async (req, res) => {
   const { id } = req.params;
-  const { from, to, limit } = req.body;
+  const { from, to, limit } = req.query;
 
   if (!id) return res.status(400).json({ error: 'The "id" param is require' });
 
