@@ -185,7 +185,7 @@ const userExperianceList = async (id, from, to, limit) => {
       exercises,
     };
   } catch (err) {
-    throw new Error('Something went wrong try again later');
+    throw new Error(err);
   }
 };
 
