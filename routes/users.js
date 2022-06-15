@@ -11,6 +11,6 @@ const {
 router.get('/', users_list);
 router.post('/', user_create);
 router.post('/:id/exercises', user_exercise_create);
-router.get('/:id/exercises', user_exercises_list);
+router.get('/:id/logs', user_exercises_list);
 
 module.exports = router;

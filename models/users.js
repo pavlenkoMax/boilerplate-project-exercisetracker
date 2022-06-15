@@ -75,7 +75,7 @@ const userExperianceCreate = async (id, description, duration, date) => {
         description,
       };
     } else {
-      throw new Error();
+      throw new Error('Something went wrong try again later');
     }
   } catch (err) {
     throw new Error(err);
@@ -171,6 +171,10 @@ const userExperianceList = async (id, from, to, limit) => {
     const user = await getUserById(id);
     const exercisesCount = await getExercisesCount(id);
     const exercises = await getAllExperiancesForUser(id, from, to, limit);
+    
+    if (!user) {
+      throw new Error(`User id:${id} is not defined`);
+    }
 
     return {
       ...user,
@@ -178,7 +182,7 @@ const userExperianceList = async (id, from, to, limit) => {
       exercises,
     };
   } catch (err) {
-    throw new Error(err);
+    throw new Error('Something went wrong try again later');
   }
 };
 
