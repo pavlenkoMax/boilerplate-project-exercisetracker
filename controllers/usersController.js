@@ -40,7 +40,7 @@ const user_exercise_create = async (req, res) => {
       res.json(experience).end();
     })
     .catch((error) => {
-      res.status(500).send({ error: error.message });
+      res.status(400).send({ error: error.message });
     });
 };
 

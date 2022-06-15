@@ -56,6 +56,9 @@ const getExercisesCount = id => {
 const userExperianceCreate = async (id, description, duration, date) => {
   try {
     const user = await getUserById(id);
+
+    if (!user) throw new Error('User id:${id} is not defined');
+
     const result = await db.run(
       `
       INSERT INTO
